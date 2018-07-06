@@ -1,0 +1,587 @@
+#!/usr/bin/perl
+
+use strict;
+
+use DBI;
+
+
+
+my $DB_server = "localhost";
+my $DB_user   = "asteriskuser";
+my $DB_pass   = "kropsys2015";
+my $DB_name   = "dbclientes";
+
+my $path_audios = "/var/lib/asterisk/sounds/hcds";
+
+#ext-queues
+
+my $transferencia_agendar_hora_medica = "05";
+my $transferencia_examenes_toma_muestras = "05";
+my $transferencia_urgencias = "05";
+my $transferencia_otras_informaciones = "05";
+my $transferencia_otros_IVR = "05";
+
+my $context = "from-pstn";
+my $extension = "";
+my $priority = "1";
+
+my $callid = "";
+my $ani = "";
+
+
+
+$|=1;
+
+
+
+#
+# Lectura y asignacion de variables AGI
+# entregadas por el Asterisk al script
+#
+
+my %AGI;
+
+while(<STDIN>) {
+    chomp;
+    last unless length($_);
+    if (/^agi_(\w+)\:\s+(.*)$/) {
+        $AGI{$1} = $2;
+    }
+}
+
+#
+# Impresion las variables AGI
+# comentareada ya que no sirve para nada,
+# solo para un eventual debug en caso de
+# que las variables se usen para algo dentro
+# del script.
+#
+#print STDERR "Variables AGI:\n";
+#foreach my $i (sort keys %AGI) {
+#    print STDERR "    $i = $AGI{$i}\n";
+#}
+
+
+
+if ($#ARGV != 1) {
+    &execute_agi("VERBOSE \"Problemas al ejecutar AGI. Uso: AGI(ivr-hcds-v2.agi,callid,ani)\"");
+    exit;
+}
+$callid = $ARGV[0];
+$ani = $ARGV[1];
+
+
+
+use warnings;
+
+$SIG{HUP}    = 'signal_handler';
+$SIG{TRAP}   = 'signal_handler';
+$SIG{KILL}   = 'signal_handler';
+$SIG{PIPE}   = 'signal_handler';
+$SIG{CHLD}   = 'signal_handler';
+$SIG{TTIN}   = 'signal_handler';
+$SIG{XFSZ}   = 'signal_handler';
+$SIG{IO}     = 'signal_handler';
+$SIG{INT}    = 'signal_handler';
+$SIG{ABRT}   = 'signal_handler';
+$SIG{USR1}   = 'signal_handler';
+$SIG{ALRM}   = 'signal_handler';
+$SIG{CONT}   = 'signal_handler';
+$SIG{TTOU}   = 'signal_handler';
+$SIG{VTALRM} = 'signal_handler';
+$SIG{PWR}    = 'signal_handler';
+$SIG{QUIT}   = 'signal_handler';
+$SIG{BUS}    = 'signal_handler';
+$SIG{SEGV}   = 'signal_handler';
+$SIG{TERM}   = 'signal_handler';
+$SIG{STOP}   = 'signal_handler';
+$SIG{URG}    = 'signal_handler';
+$SIG{PROF}   = 'signal_handler';
+$SIG{SYS}    = 'signal_handler';
+$SIG{ILL}    = 'signal_handler';
+$SIG{FPE}    = 'signal_handler';
+$SIG{USR2}   = 'signal_handler';
+$SIG{STKFLT} = 'signal_handler';
+$SIG{TSTP}   = 'signal_handler';
+$SIG{XCPU}   = 'signal_handler';
+$SIG{WINCH}  = 'signal_handler';
+$SIG{RTMIN}  = 'signal_handler';
+
+sub signal_handler {
+    &log("Caught a signal $!");
+    &log("Saliendo de la aplicacion de IVR");
+    exit;
+}
+
+
+
+my $transferir = 0;
+my $escuchar_menu =0;
+my $opcion = "";
+my $rama_ivr = "";
+
+my @dias_semana = qw( Domingo Lunes Martes Miercoles Jueves Viernes Sabado );
+my $hora_actual;
+my $dia_semana;
+my $horario_inhabil;
+my $hora_inicio = "08:00:00";
+my $hora_termino = "20:00:00";
+my $hora_inicio_sabado = "09:00:00";
+my $hora_termino_sabado = "14:00:00";
+
+my $rut_cliente = "";
+my $rut_real = "";
+my $nombre_cliente = "";
+my $prevision_cliente = "";
+
+
+
+
+my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
+$hora_actual = sprintf("%02d:%02d:%02d", $hour, $min, $sec);
+$dia_semana = $wday;
+
+if(($dia_semana eq 6) && ($hora_actual gt $hora_inicio_sabado) && ($hora_actual lt $hora_termino_sabado)) {
+    $horario_inhabil = 1;
+} else {
+    if(($dia_semana gt 0) && ($dia_semana lt 6) && ($hora_actual gt $hora_inicio) && ($hora_actual lt $hora_termino)) {
+        $horario_inhabil = 0;
+    }
+}
+
+ # &log("Opcion seleccionada: $opcion - Otras Informaciones.");
+
+         #   $rama_ivr = "Otras IVR";
+         #  
+         #   $context = "from-internal";
+         #   $extension = $transferencia_otros_IVR;
+    #
+        #    $transferir = 1;
+
+
+&execute_agi("VERBOSE \"Ejecutanto IVR para la llamada '$callid'\"");
+&log("Ingresando al IVR.");
+&log("    CallId      : $callid");
+&log("    ANI         : $ani");
+&log("    Dia         : " . $dias_semana[$dia_semana]);
+&log("    Hora actual : $hora_actual");
+if($dia_semana eq 0) {
+    &log("    Horario de atencion: No se atiende");
+}
+if($dia_semana eq 6) {
+    &log("    Horario de atencion: $hora_inicio_sabado a $hora_termino_sabado");
+}
+if(($dia_semana gt 0) && ($dia_semana lt 6)) {
+    &log("    Horario de atencion: $hora_inicio a $hora_termino");
+}
+if($horario_inhabil) {
+    &log("    Llamada en horario inhabil");
+} else {
+    &log("    Llamada en horario habil");
+}
+&registraIngresoLlamada();
+
+
+
+            
+
+
+if(!$horario_inhabil) {
+
+   
+
+    while($escuchar_menu) {
+
+        $escuchar_menu = 0;
+
+        $opcion = "";
+
+        while(($opcion ne "0") && ($opcion ne "1") && ($opcion ne "2") && ($opcion ne "3") && ($opcion ne "4") && ($opcion ne "8")) {
+            &log("Presentando Menu Principal.");
+            $opcion = &execute_agi("GET DATA $path_audios/menu-principal 3000 1");
+            if(($opcion ne "0") && ($opcion ne "1") && ($opcion ne "2") && ($opcion ne "3") && ($opcion ne "4") && ($opcion ne "8")) {
+                &log("Opcion invalida: $opcion.");
+                &execute_agi("EXEC PlayBack $path_audios/opcion-incorrecta");
+            }
+        }
+
+        if($opcion eq "0") {
+            &log("Opcion seleccionada: $opcion - Escuchar nuevamente el Menu.");
+            $escuchar_menu = 1;
+        }
+
+        if($opcion eq "1") {
+            &log("Opcion seleccionada: $opcion - Agendar Hora Medica.");
+
+            $rama_ivr = "Agendar Hora Medica";
+
+            &ingresoRut();
+
+        $context = "ext-queues";
+
+            $extension = $transferencia_agendar_hora_medica;
+
+            $transferir = 1;
+        }
+
+        if($opcion eq "2") {
+            &log("Opcion seleccionada: $opcion - Examenes y Toma de Muestras.");
+
+            $rama_ivr = "Examenes y Toma de Muestras";
+
+            &ingresoRut();
+            
+            $context = 'from-internal';
+
+            $extension = $transferencia_examenes_toma_muestras;
+
+            $transferir = 1;
+        }
+
+        if($opcion eq "3") {
+            &log("Opcion seleccionada: $opcion - Urgencias.");
+
+            $rama_ivr = "Urgencias";
+
+            &ingresoRut();
+
+            $context = "from-internal";
+            $extension = $transferencia_urgencias;
+
+            $transferir = 1;
+        }
+
+        if($opcion eq "4") {
+            &log("Opcion seleccionada: $opcion - Otras Informaciones.");
+
+            $rama_ivr = "Otras Informaciones";
+
+            &ingresoRut();
+
+            $context = "from-internal";
+            $extension = $transferencia_otras_informaciones;
+
+            $transferir = 1;
+        }
+
+       if($opcion eq "8") {
+            &log("Opcion seleccionada: $opcion - Otras Informaciones.");
+
+            $rama_ivr = "Otras IVR";
+
+            &ingresoRut();
+
+            $context = "from-internal";
+            $extension = $transferencia_otros_IVR;
+
+            $transferir = 1;
+        }
+
+
+    }
+
+} else {
+
+    
+
+    while($escuchar_menu) {
+
+        $escuchar_menu = 0;
+
+        $opcion = "";
+
+        while(($opcion ne "0") && ($opcion ne "1") && ($opcion ne "2") && ($opcion ne "8")) {
+            &log("Presentando Menu Principal Horario Inhabil.");
+            $opcion = &execute_agi("GET DATA $path_audios/menu-principal-horario-inhabil 3000 1");
+            if(($opcion ne "0") && ($opcion ne "1") && ($opcion ne "2") && ($opcion ne "8")) {
+                &log("Opcion invalida: $opcion.");
+                &execute_agi("EXEC PlayBack $path_audios/opcion-incorrecta");
+            }
+        }
+
+        if($opcion eq "0") {
+            &log("Opcion seleccionada: $opcion - Escuchar nuevamente el Menu.");
+            $escuchar_menu = 1;
+        }
+
+        if($opcion eq "1") {
+            &log("Opcion seleccionada: $opcion - Urgencias.");
+
+            $rama_ivr = "Urgencias";
+
+            &ingresoRut();
+
+            $context = "from-internal";
+            $extension = $transferencia_urgencias;
+
+            $transferir = 1;
+        }
+
+        if($opcion eq "2") {
+            &log("Opcion seleccionada: $opcion - Contactar Cliente.");
+
+            $rama_ivr = "Contactar Cliente";
+
+            &ingresoRut();
+
+            &execute_agi("EXEC PlayBack $path_audios/mensaje-datos-receptionados");
+
+            &registraEstadoLlamada(0, 1, 0);
+
+            $transferir = 0;
+        }
+
+       if($opcion eq "8") {
+            &log("Opcion seleccionada: $opcion - Otras Informaciones.");
+
+            $rama_ivr = "Otros IVR Santiago";
+
+            &ingresoRut();
+
+            $context = "from-internal";
+            $extension = $transferencia_otros_IVR;
+
+            $transferir = 1;
+        }
+
+
+   }
+
+}
+
+
+
+if($transferir) {
+    &log("La llamada se transferira a $extension.");
+
+    &execute_agi("SET RUT_Cliente $rut_cliente");
+    &execute_agi("SET Nombre_Cliente $nombre_cliente");
+    &execute_agi("SET Prevision_Cliente $prevision_cliente");
+    &execute_agi("SET Rama_IVR $rama_ivr");
+    &execute_agi("SET CONTEXT $context");
+    &execute_agi("SET EXTENSION $extension");
+    &execute_agi("SET PRIORITY $priority");
+
+ 
+    &registraEstadoLlamada(0, 0, 1);
+}
+
+
+
+sub registraIngresoLlamada {
+    my $DBIConnection;
+    my $DBIStmt;
+
+    my $SQLStmt;
+
+    &log("Registrando llamada en la base de datos.");
+
+    $SQLStmt = "INSERT INTO llamadas_ivr (callid, fecha_hora_llamada, ani, horario_inhabil, llamada_abandonada, llamada_autoatendida, llamada_transferida) VALUES ('$callid', NOW(), '$ani', $horario_inhabil, 0, 0, 0)";
+    &log("    Sentencia SQL: $SQLStmt");
+
+    $DBIConnection = DBI->connect("DBI:mysql:host=$DB_server;database=$DB_name", "$DB_user", "$DB_pass") or die "Couldn't connect to database: " . DBI->errstr;
+
+    $DBIStmt = $DBIConnection->prepare($SQLStmt) or die "preparing: ",$DBIConnection->errstr;
+    $DBIStmt->execute() or die "Error en SQL: $SQLStmt ", $DBIConnection->errstr;
+
+    $DBIStmt->finish();
+
+    $DBIConnection->disconnect();
+}
+
+
+
+sub registraDatosLlamada {
+    my $DBIConnection;
+    my $DBIStmt;
+
+    my $SQLStmt;
+
+    &log("Actualizando datos de la llamada en la base de datos.");
+
+    $SQLStmt = "UPDATE llamadas_ivr SET opcion = '$rama_ivr', rut_cliente = '$rut_cliente', rut_real = '$rut_real', nombre_cliente = '$nombre_cliente', prevision_cliente = '$prevision_cliente' WHERE callid = '$callid'";
+    &log("    Sentencia SQL: $SQLStmt");
+
+    $DBIConnection = DBI->connect("DBI:mysql:host=$DB_server;database=$DB_name", "$DB_user", "$DB_pass") or die "Couldn't connect to database: " . DBI->errstr;
+
+    $DBIStmt = $DBIConnection->prepare($SQLStmt) or die "preparing: ",$DBIConnection->errstr;
+    $DBIStmt->execute() or die "Error en SQL: $SQLStmt ", $DBIConnection->errstr;
+
+    $DBIStmt->finish();
+
+    $DBIConnection->disconnect();
+}
+
+
+
+sub registraEstadoLlamada {
+    my $llamada_abandonada = $_[0];
+    my $llamada_autoatendida = $_[1];
+    my $llamada_transferida = $_[2];
+
+    my $DBIConnection;
+    my $DBIStmt;
+
+    my $SQLStmt;
+
+    &log("Actualizando estado de la llamada en la base de datos.");
+
+    $SQLStmt = "UPDATE llamadas_ivr SET llamada_abandonada = $llamada_abandonada, llamada_autoatendida = $llamada_autoatendida, llamada_transferida = $llamada_transferida WHERE callid = '$callid'";
+    &log("    Sentencia SQL: $SQLStmt");
+
+    $DBIConnection = DBI->connect("DBI:mysql:host=$DB_server;database=$DB_name", "$DB_user", "$DB_pass") or die "Couldn't connect to database: " . DBI->errstr;
+
+    $DBIStmt = $DBIConnection->prepare($SQLStmt) or die "preparing: ",$DBIConnection->errstr;
+    $DBIStmt->execute() or die "Error en SQL: $SQLStmt ", $DBIConnection->errstr;
+
+    $DBIStmt->finish();
+
+    $DBIConnection->disconnect();
+}
+
+
+
+sub ingresoRut {
+    &registraDatosLlamada();
+
+    my $rutInvalido = 1;
+
+    while($rutInvalido) {
+        &log("Se solicita ingreso de RUT.");
+        $rut_cliente = &execute_agi("GET DATA $path_audios/ingrese-rut 3000 10");
+        &log("    RUT ingresado: $rut_cliente.");
+        if(&validaRut($rut_cliente)) {
+            $rutInvalido = 0;
+            &buscaRutDB($rut_cliente);
+        } else {
+            &execute_agi("EXEC PlayBack $path_audios/rut-invalido");
+        }
+    }
+}
+
+
+
+sub validaRut {
+    my $rut = substr($_[0], 0, length($_[0]) - 1);
+    my $dv = substr($_[0], length($_[0]) - 1, 1);
+
+    my $aux_suma = 0;
+
+    if(length($rut) < 7) {
+        return 0;
+    }
+
+    my $auxJ = 2;
+    for(my $auxI = length($rut) - 1 ; $auxI >= 0 ; $auxI--) {
+        $aux_suma += substr($rut, $auxI, 1) * $auxJ;
+
+        if(++$auxJ > 7) {
+            $auxJ = 2;
+        }
+    }
+
+    my $aux_dv_calculado = 11 - ($aux_suma % 11);
+
+    my $auxB = 0;
+
+    if($aux_dv_calculado < 10) {                            # Corresponde a digito calculado
+        if($dv == $aux_dv_calculado) {
+            $rut_real = $rut . "-" . $aux_dv_calculado;
+            $auxB = 1;
+        }
+    } else {
+        if($aux_dv_calculado == 10) {                       # Corresponde a letra K
+            if($dv == 1) {
+                $rut_real = $rut . "-K";
+                $auxB = 1;
+            }
+        } else {                                            # Corresponde a digito cero
+            if($dv == 0) {
+                $rut_real = $rut . "-0";
+                $auxB = 1;
+            }
+        }
+    }
+
+    if($auxB) {
+        &log("    Rut valido. Rut real: $rut_real.");
+    } else {
+        &log("    Rut invalido.");
+    }
+
+    return $auxB;
+}
+
+
+
+sub buscaRutDB {
+    my $rut = $_[0];
+
+    if(length($rut) > 0) {
+        my $DBIConnection;
+        my $DBIStmt;
+
+        my $SQLStmt;
+
+        &log("Se buscara el rut en la base de datos.");
+
+        $SQLStmt = "SELECT rut, nombre, prevision FROM clientes WHERE rut = '$rut'";
+
+        $DBIConnection = DBI->connect("DBI:mysql:host=$DB_server;database=$DB_name", "$DB_user", "$DB_pass") or die "Couldn't connect to database: " . DBI->errstr;
+
+        $DBIStmt = $DBIConnection->prepare($SQLStmt) or die "preparing: ",$DBIConnection->errstr;
+        $DBIStmt->execute() or die "executing: $SQLStmt ", $DBIConnection->errstr;
+
+        if(my @row = $DBIStmt->fetchrow_array()) {
+            $nombre_cliente = $row[1];
+            $prevision_cliente = $row[2];
+            &log("    Cliente $rut encontrado.");
+            &log("        Nombre: $nombre_cliente.");
+            &log("        Prevision: $prevision_cliente.");
+        } else {
+            &log("    Cliente $rut no encontrado.");
+        }
+
+        $DBIStmt->finish();
+
+        $DBIConnection->disconnect();
+
+        &registraDatosLlamada();
+    }
+}
+
+
+
+sub log {
+    my $mensaje = $_[0];
+    my @months = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
+    my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
+    my $archivo_log = sprintf("/var/log/asterisk/ivr-hcds-v2.%04d%02d%02d.log", $year + 1900, $mon + 1, $mday);
+    open(my $fh, ">>", $archivo_log);
+    printf $fh "[%02d-%s-%04d %02d:%02d:%02d] [%20s] %s\n", $mday, $months[$mon], $year + 1900, $hour, $min, $sec, $callid, $mensaje;
+    close $fh;
+}
+
+
+
+sub execute_agi {
+    my $command = $_[0];
+    my $retval = "";
+
+    print "$command\n";
+    print STDERR "Ejecutando comando '$command'...\n";
+    my $result = <STDIN>;
+    chomp $result;
+    if ($result =~ /^200/) {
+        $result =~ /result=(-?\d+)/;
+        if (!length($1)) {
+            print STDERR "Error (resultado=$result)\n";
+        } else {
+            print STDERR "Ok (resultado=$1)\n";
+            $retval = "$1";
+        }
+    } else {
+        print STDERR "WTF??? (resultado='$result')\n";
+    }
+    $retval;
+}
