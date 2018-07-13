@@ -1,0 +1,9 @@
+C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe.config
+C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.pdb
+C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\obj\Debug\KropsysSmsService.KropsysSmsService.resources
+C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\obj\Debug\KropsysSmsService.ProjectInstaller.resources
+C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\obj\Debug\kropsysSmsService.csproj.GenerateResource.cache
+C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\obj\Debug\kropsysSmsService.csproj.CoreCompileInputs.cache
+C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\obj\Debug\kropsysSmsService.exe
+C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\obj\Debug\kropsysSmsService.pdb

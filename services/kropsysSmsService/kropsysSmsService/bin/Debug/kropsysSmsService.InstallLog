@@ -1,0 +1,103 @@
+﻿Instalando ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Instalando el servicio KropsysSmsService...
+Creando el origen de EventLog KropsysSmsService en el registro Application...
+Deshaciendo ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Restaurando el registro de eventos al estado anterior para el origen KropsysSmsService.
+Excepción durante la fase de retroceso al estado original del instalador System.Diagnostics.EventLogInstaller.
+System.Security.SecurityException: No se encontró el origen, pero no se pudo buscar en algunos o todos los registros de eventos. Registros inaccesibles: Security.
+Excepción durante la fase de instalación de retroceso al estado original. Esta excepción se omitirá y se continuará con el retroceso al estado original. Sin embargo, puede que el equipo no recupere el estado inicial hasta que se haya completado esta fase.
+Instalando ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Instalando el servicio KropsysSmsService...
+El servicio KropsysSmsService se ha instalado correctamente.
+Creando el origen de EventLog KropsysSmsService en el registro Application...
+Confirmando ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Desinstalando ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Quitando el origen de EventLog KropsysSmsService.
+Se está quitando el servicio KropsysSmsService del sistema...
+El servicio KropsysSmsService se ha quitado correctamente del sistema.
+Intento de detener el servicio KropsysSmsService.
+Instalando ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Instalando el servicio KropsysSmsService...
+El servicio KropsysSmsService se ha instalado correctamente.
+Creando el origen de EventLog KropsysSmsService en el registro Application...
+Confirmando ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Desinstalando ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Quitando el origen de EventLog KropsysSmsService.
+Se está quitando el servicio KropsysSmsService del sistema...
+El servicio KropsysSmsService se ha quitado correctamente del sistema.
+Intento de detener el servicio KropsysSmsService.
+Instalando ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Instalando el servicio KropsysSmsService...
+El servicio KropsysSmsService se ha instalado correctamente.
+Creando el origen de EventLog KropsysSmsService en el registro Application...
+Confirmando ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Desinstalando ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Quitando el origen de EventLog KropsysSmsService.
+Se está quitando el servicio KropsysSmsService del sistema...
+El servicio KropsysSmsService se ha quitado correctamente del sistema.
+Intento de detener el servicio KropsysSmsService.
+Instalando ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Instalando el servicio KropsysSmsService...
+El servicio KropsysSmsService se ha instalado correctamente.
+Creando el origen de EventLog KropsysSmsService en el registro Application...
+Confirmando ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Desinstalando ensamblado 'C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   logfile = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.InstallLog
+   assemblypath = C:\Users\leobo\source\repos\kropsysSmsService\kropsysSmsService\bin\Debug\kropsysSmsService.exe
+Quitando el origen de EventLog KropsysSmsService.
+Se está quitando el servicio KropsysSmsService del sistema...
+El servicio KropsysSmsService se ha quitado correctamente del sistema.
